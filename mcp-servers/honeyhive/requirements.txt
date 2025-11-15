@@ -1,0 +1,6 @@
+fastmcp>=2.12.4
+honeyhive>=0.2.57
+python-dotenv>=1.0.0
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-asyncio>=0.21.0

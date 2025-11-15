@@ -1,0 +1,91 @@
+version: '3.8'
+
+# Phase 2 Integration Testing - Docker Compose Configuration
+# Runs all 4 MCP servers for integration testing
+#
+# Usage:
+#   docker-compose -f docker-compose.test.yml up
+#   docker-compose -f docker-compose.test.yml down
+
+services:
+  # Gladia MCP Server - Speech-to-text transcription
+  gladia-mcp:
+    image: gladia-mcp:latest
+    container_name: gladia-mcp
+    ports:
+      - "8000:8000"
+    environment:
+      - GLADIA_API_KEY=${GLADIA_API_KEY}
+      - PORT=8000
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - mcp-network
+    restart: unless-stopped
+
+  # HoneyHive MCP Server - Observability and tracing
+  honeyhive-mcp:
+    image: honeyhive-mcp:latest
+    container_name: honeyhive-mcp
+    ports:
+      - "8001:8001"
+    environment:
+      - HONEYHIVE_API_KEY=${HONEYHIVE_API_KEY}
+      - HONEYHIVE_PROJECT=${HONEYHIVE_PROJECT:-stepwise-agent}
+      - PORT=8001
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - mcp-network
+    restart: unless-stopped
+
+  # Horizon3 MCP Server - Security scanning
+  horizon3-mcp:
+    image: horizon3-mcp:latest
+    container_name: horizon3-mcp
+    ports:
+      - "8002:8002"
+    environment:
+      - HORIZON3_API_KEY=${HORIZON3_API_KEY}
+      - HORIZON3_USE_MOCK=${HORIZON3_USE_MOCK:-true}
+      - PORT=8002
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://localhost:8002/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - mcp-network
+    restart: unless-stopped
+
+  # Custom API MCP Server - Generic HTTP client
+  custom-api-mcp:
+    image: custom-api-mcp:latest
+    container_name: custom-api-mcp
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8003/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - mcp-network
+    restart: unless-stopped
+
+networks:
+  mcp-network:
+    driver: bridge
+    name: stepwise-mcp-network
