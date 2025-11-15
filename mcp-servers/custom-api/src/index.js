@@ -4,11 +4,12 @@ import { callApi } from './tools.js'
 
 dotenv.config()
 
-const mcp = new FastMCP('custom-api-mcp-server', {
-  port: process.env.PORT || 8003
+const mcp = new FastMCP({
+  name: 'custom-api-mcp-server',
+  version: '1.0.0'
 })
 
-mcp.tool({
+mcp.addTool({
   name: 'call_api',
   description: 'Make HTTP request to any REST API. Supports GET, POST, PUT, PATCH, DELETE with headers, query params, and body.',
   parameters: {
@@ -44,9 +45,15 @@ mcp.tool({
   execute: callApi
 })
 
-mcp.server.get('/health', (req, res) => {
-  res.json({ status: 'healthy', service: 'custom-api-mcp' })
+// Start MCP server
+const PORT = process.env.PORT || 8003
+await mcp.start({
+  transportType: 'httpStream',
+  httpStream: {
+    port: PORT,
+    endpoint: '/mcp'
+  }
 })
 
-await mcp.run('streamable-http')
-console.log(`Custom API MCP Server running on port ${process.env.PORT || 8003}`)
+console.log(`Custom API MCP Server running on port ${PORT}`)
+console.log(`MCP endpoint: http://localhost:${PORT}/mcp`)

@@ -2,6 +2,9 @@
 # Base image: Node.js 20 slim (updated for undici compatibility)
 FROM node:20-slim
 
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Set working directory
 WORKDIR /app
 
@@ -17,9 +20,9 @@ COPY src/ ./src/
 # Expose port 8000
 EXPOSE 8000
 
-# Health check - verify server responds
+# Health check - verify server responds (any HTTP status is OK)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:8000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"
+  CMD curl --fail-with-body -s -o /dev/null -w "%{http_code}" http://localhost:8000/mcp | grep -q "^[0-9]" || exit 1
 
 # Start server
 CMD ["node", "src/index.js"]

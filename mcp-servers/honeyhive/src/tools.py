@@ -17,8 +17,7 @@ if not HONEYHIVE_API_KEY:
     raise ValueError("HONEYHIVE_API_KEY not set in environment")
 
 # Initialize HoneyHive client
-# The SDK reads HONEYHIVE_API_KEY from environment variables automatically
-hh = HoneyHive()
+hh = HoneyHive(bearer_auth=HONEYHIVE_API_KEY)
 
 
 async def create_trace(

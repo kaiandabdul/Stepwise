@@ -16,7 +16,10 @@ const PORT = 8000
 const SERVER_NAME = 'gladia-mcp'
 
 // Initialize FastMCP server
-const mcp = new FastMCP(SERVER_NAME)
+const mcp = new FastMCP({
+  name: SERVER_NAME,
+  version: '1.0.0'
+})
 
 console.log(`[${SERVER_NAME}] Initializing Gladia MCP Server...`)
 
@@ -64,24 +67,17 @@ mcp.addTool({
   }
 })
 
-// Health check endpoint
-mcp.server.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    service: 'gladia-mcp',
-    timestamp: new Date().toISOString(),
-    port: PORT,
-    tools: ['transcribe_audio', 'get_supported_languages']
-  })
-})
-
 // Start server
 console.log(`[${SERVER_NAME}] Starting server on port ${PORT}...`)
 console.log(`[${SERVER_NAME}] Tools registered: transcribe_audio, get_supported_languages`)
-console.log(`[${SERVER_NAME}] Health endpoint: http://localhost:${PORT}/health`)
 
-await mcp.run('streamable-http', {
-  port: PORT
+await mcp.start({
+  transportType: 'httpStream',
+  httpStream: {
+    port: PORT,
+    endpoint: '/mcp'
+  }
 })
 
-console.log(`[${SERVER_NAME}] Server running on port ${PORT}`)
+console.log(`[${SERVER_NAME}] Gladia MCP Server running on port ${PORT}`)
+console.log(`[${SERVER_NAME}] MCP endpoint: http://localhost:${PORT}/mcp`)

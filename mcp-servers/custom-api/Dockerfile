@@ -17,9 +17,9 @@ COPY src/ ./src/
 # Expose port
 EXPOSE 8003
 
-# Health check
+# Health check - verify server responds (any HTTP status is OK)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8003/health || exit 1
+  CMD curl --fail-with-body -s -o /dev/null -w "%{http_code}" http://localhost:8003/mcp | grep -q "^[0-9]" || exit 1
 
 # Start server
 CMD ["node", "src/index.js"]

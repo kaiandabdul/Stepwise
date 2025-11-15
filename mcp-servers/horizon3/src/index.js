@@ -4,11 +4,12 @@ import { runSecurityScan, getScanResults, validatePermissions } from './tools.js
 
 dotenv.config()
 
-const mcp = new FastMCP('horizon3-mcp-server', {
-  port: process.env.PORT || 8002
+const mcp = new FastMCP({
+  name: 'horizon3-mcp-server',
+  version: '1.0.0'
 })
 
-mcp.tool({
+mcp.addTool({
   name: 'run_security_scan',
   description: 'Run security scan on API endpoint using Horizon3.ai NodeZero',
   parameters: {
@@ -30,7 +31,7 @@ mcp.tool({
   execute: runSecurityScan
 })
 
-mcp.tool({
+mcp.addTool({
   name: 'get_scan_results',
   description: 'Retrieve results from previous security scan',
   parameters: {
@@ -46,7 +47,7 @@ mcp.tool({
   execute: getScanResults
 })
 
-mcp.tool({
+mcp.addTool({
   name: 'validate_permissions',
   description: 'Validate RBAC permissions for user action',
   parameters: {
@@ -70,9 +71,15 @@ mcp.tool({
   execute: validatePermissions
 })
 
-mcp.server.get('/health', (req, res) => {
-  res.json({ status: 'healthy', service: 'horizon3-mcp' })
+// Start MCP server
+const PORT = process.env.PORT || 8002
+await mcp.start({
+  transportType: 'httpStream',
+  httpStream: {
+    port: PORT,
+    endpoint: '/mcp'
+  }
 })
 
-await mcp.run('streamable-http')
-console.log(`Horizon3 MCP Server running on port ${process.env.PORT || 8002}`)
+console.log(`Horizon3 MCP Server running on port ${PORT}`)
+console.log(`MCP endpoint: http://localhost:${PORT}/mcp`)

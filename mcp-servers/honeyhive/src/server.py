@@ -13,10 +13,7 @@ from tools import create_trace, log_event, log_metric, end_trace
 load_dotenv()
 
 # Initialize FastMCP server
-mcp = FastMCP(
-    "honeyhive-mcp-server",
-    port=int(os.getenv("PORT", 8001))
-)
+mcp = FastMCP("honeyhive-mcp-server")
 
 
 @mcp.tool()
@@ -103,18 +100,13 @@ async def end_trace_tool(
     return await end_trace(trace_id, status, metadata)
 
 
-@mcp.server.get("/health")
-async def health():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "service": "honeyhive-mcp",
-        "port": int(os.getenv("PORT", 8001)),
-        "project": os.getenv("HONEYHIVE_PROJECT", "stepwise-agent")
-    }
-
-
 if __name__ == "__main__":
-    print(f"Starting HoneyHive MCP Server on port {os.getenv('PORT', 8001)}...")
+    PORT = int(os.getenv('PORT', 8001))
+    print(f"Starting HoneyHive MCP Server on port {PORT}...")
     print(f"HoneyHive Project: {os.getenv('HONEYHIVE_PROJECT', 'stepwise-agent')}")
-    mcp.run()
+    mcp.run(
+        transport="http",
+        host="0.0.0.0",
+        port=PORT,
+        path="/mcp"
+    )
