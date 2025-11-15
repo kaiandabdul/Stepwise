@@ -35,8 +35,8 @@
   "author": "Stepwise Team",
   "license": "MIT",
   "dependencies": {
-    "@e2b/code-interpreter": "^2.3.0",
-    "e2b": "^1.0.4",
+    "@e2b/code-interpreter": "^2.2.0",
+    "e2b": "^2.6.4",
     "express": "^4.21.1",
     "dotenv": "^16.4.5",
     "openai": "^4.73.0",

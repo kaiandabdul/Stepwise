@@ -1,3 +1,7 @@
+# IMPORTANT: Python 3.13.x Required
+# pydantic-core does not support Python 3.14 yet due to PyO3 compatibility
+# Use Python 3.13.x: pyenv install 3.13.0 && pyenv local 3.13.0
+
 # Core E2B Integration
 e2b>=2.6.3
 e2b-code-interpreter>=2.3.0
