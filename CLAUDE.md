@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🎯 Current Project Status
+
+**Phase 1: COMPLETE ✅** (as of November 15, 2025)
+- ✅ All project structure and configuration files created
+- ✅ **AI Gateway Migration Complete** - Migrated from OpenAI/Anthropic to Vercel AI Gateway
+- ✅ 5 specialized models configured (Claude Haiku/Sonnet, GPT-5.1 variants)
+- ✅ All documentation updated and consistent
+- ✅ Validation scripts operational (AI Gateway: 2/2 checks passing)
+- 🚀 **Ready for Phase 2**: MCP Server Implementation
+
+**Next Steps:** Implement 4 MCP servers (Gladia, HoneyHive, Horizon3, Custom API)
+
+---
+
 ## Project Overview
 
 **Stepwise** is a Live API Debugger Agent built using the Model Context Protocol (MCP) for the E2B + Docker MCP Hackathon. It provides conversational API debugging through voice/text input, multi-stage workflow orchestration across sponsor tools, and automated tracing.
@@ -54,6 +68,7 @@ User records audio
 
 - **Why MCP**: Standardizes tool integration, allows adding new APIs without agent changes
 - **Why E2B + Docker**: Isolation (untrusted code execution), reproducibility, hackathon requirement
+- **Why AI Gateway**: Unified LLM access, 5 specialized models, built-in observability, automatic fallbacks
 - **Why LLM for Planning**: Converts natural language to structured workflows with dependencies
 - **Why Gradio**: Native audio input support, faster than custom React frontend
 
@@ -129,7 +144,7 @@ mkdir -p frontend e2b-template
 # Configure environment
 cp .env.example .env
 # Edit .env with: E2B_API_KEY, GLADIA_API_KEY, HONEYHIVE_API_KEY,
-#                 HORIZON3_API_KEY, OPENAI_API_KEY
+#                 HORIZON3_API_KEY, AI_GATEWAY_API_KEY
 ```
 
 ### Local Development (without E2B)
@@ -299,14 +314,54 @@ Required in `.env`:
 - `HONEYHIVE_API_KEY` - HoneyHive observability
 - `HONEYHIVE_PROJECT` - Project name (default: "stepwise-agent")
 - `HORIZON3_API_KEY` - Horizon3 security (optional, can use mocks)
-- `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` - LLM provider
+- `AI_GATEWAY_API_KEY` - Vercel AI Gateway (unified LLM access)
+
+AI Gateway Model Selection (see `docs/AI_GATEWAY_INTEGRATION.md`):
+- `AI_GATEWAY_DEFAULT_MODEL` - Balanced model (default: anthropic/claude-sonnet-4.5)
+- `AI_GATEWAY_FAST_MODEL` - Fast responses (default: anthropic/claude-haiku-4.5)
+- `AI_GATEWAY_INSTANT_MODEL` - Instant OpenAI (default: openai/gpt-5.1-instant)
+- `AI_GATEWAY_CODE_MODEL` - Code tasks (default: openai/gpt-5.1-codex)
+- `AI_GATEWAY_REASONING_MODEL` - Complex reasoning (default: openai/gpt-5.1-thinking)
 
 Optional flags:
 - `USE_E2B=false` - Run locally without E2B sandboxes
 - `HORIZON3_USE_MOCK=true` - Use mock data if Horizon3 API unavailable
 - `LOG_LEVEL=debug` - Verbose logging
+- `AI_GATEWAY_BASE_URL` - Override gateway URL (defaults to https://ai-gateway.vercel.sh/v1)
+
+## Phase-Specific Notes
+
+### Phase 1 (COMPLETE ✅)
+**Completed Items:**
+- All directory structure created (40+ directories)
+- Configuration files: .env.example, package.json, requirements.txt, README.md
+- **AI Gateway Migration**: Replaced OpenAI/Anthropic with Vercel AI Gateway
+- Validation scripts: validate-config.js, validate-apis.py
+- Documentation: 11 files updated for AI Gateway consistency
+- E2B template built and working (with PEP 668 fix for Ubuntu 24.04)
+
+**Key Achievement:** AI Gateway integration provides unified LLM access with 5 specialized models
+
+### Phase 2 (NEXT)
+**To Implement:**
+- 4 MCP servers: Gladia, HoneyHive, Horizon3, Custom API
+- Each with JSON-RPC 2.0 protocol, tool definitions, health checks
+- Docker containers for each server
+- Unit tests for each MCP tool
+
+**Estimated Duration:** 8-12 hours
+
+---
 
 ## Common Issues & Solutions
+
+### AI Gateway Connection
+**Issue**: AI Gateway validation failing
+**Solution**: Verify AI_GATEWAY_API_KEY in .env, check internet connection, ensure all 5 models configured
+
+### E2B Template Build (Ubuntu 24.04)
+**Issue**: pip install fails with "externally-managed-environment" error
+**Solution**: Use `.run_cmd("pip install --break-system-packages ...")` instead of `.pip_install()`
 
 ### E2B Sandbox Timeout
 **Issue**: Sandbox creation or docker-compose startup times out

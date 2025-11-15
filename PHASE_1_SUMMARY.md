@@ -41,13 +41,20 @@ Stepwise/
 - GLADIA_API_KEY
 - HONEYHIVE_API_KEY
 - HONEYHIVE_PROJECT
-- OPENAI_API_KEY (or ANTHROPIC_API_KEY)
+- AI_GATEWAY_API_KEY (Vercel AI Gateway for unified LLM access)
+
+**AI Gateway Model Configuration (5 models):**
+- AI_GATEWAY_DEFAULT_MODEL (anthropic/claude-sonnet-4.5)
+- AI_GATEWAY_FAST_MODEL (anthropic/claude-haiku-4.5)
+- AI_GATEWAY_INSTANT_MODEL (openai/gpt-5.1-instant)
+- AI_GATEWAY_CODE_MODEL (openai/gpt-5.1-codex)
+- AI_GATEWAY_REASONING_MODEL (openai/gpt-5.1-thinking)
 
 **Optional (5):**
 - E2B_TEMPLATE_ID (set after Phase 3)
 - HORIZON3_API_KEY
 - HORIZON3_USE_MOCK
-- ANTHROPIC_API_KEY (alternative to OpenAI)
+- AI_GATEWAY_BASE_URL (defaults to https://ai-gateway.vercel.sh/v1)
 - Port customizations
 
 **MCP Server URLs (4):**
@@ -119,7 +126,8 @@ Stepwise/
 
 **scripts/validate-config.js** - Configuration validation tool
 - Checks all required environment variables
-- Validates API connectivity (E2B, Gladia, HoneyHive, OpenAI, Horizon3)
+- Validates API connectivity (E2B, Gladia, HoneyHive, AI Gateway, Horizon3)
+- Tests AI Gateway model availability (all 5 configured models)
 - Tests local port availability
 - Provides colored output with detailed feedback
 - Exit codes for CI/CD integration
@@ -167,7 +175,8 @@ node scripts/validate-config.js
 # ✓ E2B API connection successful
 # ✓ Gladia API connection successful
 # ✓ HoneyHive API connection successful
-# ✓ OpenAI API connection successful
+# ✓ AI Gateway API connection successful
+# ✓ All 5 configured models are available via AI Gateway
 # ✓ All ports are available
 ```
 
@@ -301,6 +310,16 @@ This completes Phase 1 of 8. Ready for Phase 2: MCP server implementation.
 - Validation script requires npm install to run (axios dependency)
 - README.md includes troubleshooting and all setup variations
 - CLAUDE.md provides guidance for Phase 2-8 implementations
+
+### AI Gateway Migration
+
+Phase 1 was completed with a migration to Vercel AI Gateway:
+- Unified LLM access through single API (replaces separate OpenAI/Anthropic integrations)
+- 5 specialized models for different tasks (intent parsing, workflow planning, code generation, instant responses, complex reasoning)
+- OpenAI-compatible SDK (no code changes needed - just baseURL configuration)
+- Built-in observability and cost tracking
+- Automatic provider failover for reliability
+- See `docs/AI_GATEWAY_INTEGRATION.md` for complete guide and model selection strategy
 
 ---
 

@@ -27,7 +27,7 @@ Required API keys (sign up at each service):
 - [ ] Gladia API key: https://gladia.io
 - [ ] HoneyHive API key: https://honeyhive.ai
 - [ ] Horizon3 API key: https://horizon3.ai (optional, can use mocks)
-- [ ] OpenAI API key: https://openai.com or Anthropic key: https://anthropic.com
+- [ ] Vercel AI Gateway key: https://vercel.com/docs/ai-gateway (unified LLM access)
 
 ### Installation
 
@@ -55,7 +55,7 @@ Required API keys (sign up at each service):
    GLADIA_API_KEY=your_key_here
    HONEYHIVE_API_KEY=your_key_here
    HORIZON3_API_KEY=your_key_here
-   OPENAI_API_KEY=your_key_here  # or ANTHROPIC_API_KEY
+   AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key_here
    ```
 
 4. **Validate configuration:**
@@ -248,15 +248,24 @@ curl https://api.honeyhive.ai/v1/projects \
 
 **Optional:** For development without Horizon3, set `HORIZON3_USE_MOCK=true`
 
-### OpenAI (LLM)
+### Vercel AI Gateway (LLM Access)
 
-1. Go to https://platform.openai.com and sign up
-2. Create API key from https://platform.openai.com/api-keys
-3. Add to `.env`: `OPENAI_API_KEY=<your_key>`
+Stepwise uses Vercel AI Gateway for unified access to multiple LLM providers (OpenAI and Anthropic) through a single API.
 
-**Alternative:** Use Anthropic Claude API:
-1. Go to https://www.anthropic.com and sign up
-2. Add to `.env`: `ANTHROPIC_API_KEY=<your_key>`
+1. Sign up at https://vercel.com
+2. Navigate to your project → AI Gateway section
+3. Generate an API key
+4. Add to `.env`: `AI_GATEWAY_API_KEY=<your_key>`
+
+**Model Configuration:**
+Stepwise uses 5 specific models (configured via environment variables):
+- `anthropic/claude-haiku-4.5` - Fast responses (default for quick tasks)
+- `anthropic/claude-sonnet-4.5` - Balanced general-purpose (default)
+- `openai/gpt-5.1-instant` - Instant OpenAI responses
+- `openai/gpt-5.1-codex` - Code-focused tasks
+- `openai/gpt-5.1-thinking` - Complex reasoning
+
+See `docs/AI_GATEWAY_INTEGRATION.md` for complete configuration guide.
 
 ## Running Tests
 
@@ -316,8 +325,13 @@ See `phases/` directory for detailed phase guides.
 | `HONEYHIVE_PROJECT` | Yes | HoneyHive project name | `stepwise-agent` |
 | `HORIZON3_API_KEY` | Conditional | Horizon3 security scanning key | `h3_xxx...` |
 | `HORIZON3_USE_MOCK` | No | Use mock Horizon3 data | `true/false` |
-| `OPENAI_API_KEY` | Conditional | OpenAI API key (if using GPT) | `sk_xxx...` |
-| `ANTHROPIC_API_KEY` | Conditional | Anthropic API key (if using Claude) | `sk_ant_xxx...` |
+| `AI_GATEWAY_API_KEY` | Yes | Vercel AI Gateway (unified LLM access) | `vag_xxx...` |
+| `AI_GATEWAY_BASE_URL` | No | AI Gateway URL (defaults to Vercel) | `https://ai-gateway.vercel.sh/v1` |
+| `AI_GATEWAY_DEFAULT_MODEL` | No | Default LLM model | `anthropic/claude-sonnet-4.5` |
+| `AI_GATEWAY_FAST_MODEL` | No | Fast LLM model | `anthropic/claude-haiku-4.5` |
+| `AI_GATEWAY_INSTANT_MODEL` | No | Instant LLM model | `openai/gpt-5.1-instant` |
+| `AI_GATEWAY_CODE_MODEL` | No | Code LLM model | `openai/gpt-5.1-codex` |
+| `AI_GATEWAY_REASONING_MODEL` | No | Reasoning LLM model | `openai/gpt-5.1-thinking` |
 | `USE_E2B` | No | Enable E2B sandboxes | `true/false` |
 | `LOG_LEVEL` | No | Logging verbosity | `debug/info/warn/error` |
 | `PORT` | No | Agent server port | `3000` |

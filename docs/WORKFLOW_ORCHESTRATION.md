@@ -58,9 +58,19 @@ import { WorkflowPlanner } from './workflow/planner.js'
 import { WorkflowExecutor } from './workflow/executor.js'
 import { SessionManager } from './session/manager.js'
 
+// AI Gateway Model Selection:
+// - fast: anthropic/claude-haiku-4.5 (quick tasks)
+// - balanced: anthropic/claude-sonnet-4.5 (default, most tasks)
+// - instant: openai/gpt-5.1-instant (real-time responses)
+// - code: openai/gpt-5.1-codex (code generation)
+// - reasoning: openai/gpt-5.1-thinking (complex analysis)
+
 class StepwiseAgent {
   constructor(config) {
-    this.llm = new OpenAI({ apiKey: config.openaiApiKey })
+    this.llm = new OpenAI({
+      apiKey: config.aiGatewayApiKey,
+      baseURL: config.aiGatewayBaseURL || 'https://ai-gateway.vercel.sh/v1'
+    })
     this.mcpClient = new MCPClient()
     this.planner = new WorkflowPlanner(this.llm)
     this.executor = new WorkflowExecutor(this.mcpClient)
@@ -105,8 +115,9 @@ Extract:
 Respond in JSON format.
 `
 
+    // Use fast model for quick intent parsing
     const response = await this.llm.chat.completions.create({
-      model: 'gpt-4',
+      model: 'anthropic/claude-haiku-4.5',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' }
     })
@@ -128,8 +139,9 @@ Provide:
 Be concise and helpful.
 `
 
+    // Use balanced model for response synthesis
     const response = await this.llm.chat.completions.create({
-      model: 'gpt-4',
+      model: 'anthropic/claude-sonnet-4.5',
       messages: [{ role: 'user', content: prompt }]
     })
 
@@ -247,8 +259,9 @@ For each step, specify:
 Return JSON array of steps.
 `
 
+    // Use balanced model for workflow planning
     const response = await this.llm.chat.completions.create({
-      model: 'gpt-4',
+      model: 'anthropic/claude-sonnet-4.5',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' }
     })
@@ -824,8 +837,9 @@ Suggest an alternative approach to accomplish the same goal.
 Return JSON with alternative step definition or null if no alternative exists.
 `
 
+  // Use balanced model for problem-solving
   const response = await this.llm.chat.completions.create({
-    model: 'gpt-4',
+    model: 'anthropic/claude-sonnet-4.5',
     messages: [{ role: 'user', content: prompt }],
     response_format: { type: 'json_object' }
   })
@@ -957,8 +971,9 @@ Learn from past successes:
 Plan a new workflow optimized based on past experience.
 `
 
+  // Use reasoning model for complex workflow optimization
   const response = await this.llm.chat.completions.create({
-    model: 'gpt-4',
+    model: 'openai/gpt-5.1-thinking',
     messages: [{ role: 'user', content: prompt }],
     response_format: { type: 'json_object' }
   })
@@ -1081,8 +1096,9 @@ Suggest modifications to recover from this error. Options:
 Return modified workflow as JSON.
 `
 
+  // Use balanced model for adaptive error handling
   const response = await this.llm.chat.completions.create({
-    model: 'gpt-4',
+    model: 'anthropic/claude-sonnet-4.5',
     messages: [{ role: 'user', content: prompt }],
     response_format: { type: 'json_object' }
   })

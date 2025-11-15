@@ -46,7 +46,9 @@ find /Users/codewithabdul/LockeIn/Stepwise -type d | grep -E "(agent|mcp-servers
 - GLADIA_API_KEY
 - HONEYHIVE_API_KEY, HONEYHIVE_PROJECT
 - HORIZON3_API_KEY, HORIZON3_USE_MOCK
-- OPENAI_API_KEY, ANTHROPIC_API_KEY
+- AI_GATEWAY_API_KEY (Vercel AI Gateway for unified LLM access)
+- AI_GATEWAY model configuration (5 models: DEFAULT, FAST, INSTANT, CODE, REASONING)
+- AI_GATEWAY_BASE_URL (defaults to https://ai-gateway.vercel.sh/v1)
 - MCP Server URLs (http://localhost:8000-8003)
 - USE_E2B, LOG_LEVEL, PORT, FRONTEND_PORT
 - Development flags
@@ -101,7 +103,7 @@ find /Users/codewithabdul/LockeIn/Stepwise -type d | grep -E "(agent|mcp-servers
   - Gladia (Speech-to-Text)
   - HoneyHive (Observability)
   - Horizon3 (Security)
-  - OpenAI/Anthropic (LLM)
+  - Vercel AI Gateway (Unified LLM access - replaces OpenAI/Anthropic)
 - Running locally without E2B
 - Running with Docker
 - Running with full E2B integration
@@ -122,7 +124,8 @@ find /Users/codewithabdul/LockeIn/Stepwise -type d | grep -E "(agent|mcp-servers
   - E2B sandbox API
   - Gladia speech-to-text
   - HoneyHive observability
-  - OpenAI/Anthropic LLM
+  - Vercel AI Gateway (unified LLM access)
+  - AI Gateway model availability (validates all 5 configured models)
   - Horizon3 security (with mock fallback)
 - Local port availability check
 - Color-coded output with timestamps
@@ -214,7 +217,13 @@ Before proceeding to Phase 2:
   - [ ] Gladia API key
   - [ ] HoneyHive API key
   - [ ] Horizon3 API key (optional)
-  - [ ] OpenAI or Anthropic API key
+  - [ ] Vercel AI Gateway API key (unified LLM access)
+- [ ] AI Gateway models configured (5 models):
+  - [ ] AI_GATEWAY_DEFAULT_MODEL (anthropic/claude-sonnet-4.5)
+  - [ ] AI_GATEWAY_FAST_MODEL (anthropic/claude-haiku-4.5)
+  - [ ] AI_GATEWAY_INSTANT_MODEL (openai/gpt-5.1-instant)
+  - [ ] AI_GATEWAY_CODE_MODEL (openai/gpt-5.1-codex)
+  - [ ] AI_GATEWAY_REASONING_MODEL (openai/gpt-5.1-thinking)
 
 ## Project Structure Created
 

@@ -14,7 +14,7 @@ This phase is critical because problems caught here (invalid API keys, Docker is
 ## Objectives
 
 1. Install and configure all required development tools
-2. Obtain and validate API keys for all services (E2B, Gladia, HoneyHive, Horizon3, OpenAI/Anthropic)
+2. Obtain and validate API keys for all services (E2B, Gladia, HoneyHive, Horizon3, Vercel AI Gateway)
 3. Create comprehensive project directory structure
 4. Initialize Git repository with proper .gitignore
 5. Create environment configuration files
@@ -133,7 +133,7 @@ Stepwise/
 - [ ] Gladia account and API key
 - [ ] HoneyHive account and API key
 - [ ] Horizon3.ai account and API key
-- [ ] OpenAI or Anthropic API key
+- [ ] Vercel AI Gateway API key (unified LLM access)
 - [ ] All keys validated and working
 
 ## Dependencies
@@ -158,7 +158,8 @@ At the end of Phase 1, you must be able to check off ALL of the following:
 - [ ] Gladia API key works (test with curl)
 - [ ] HoneyHive API key works (test with curl or SDK)
 - [ ] Horizon3 API key works (test with curl)
-- [ ] OpenAI/Anthropic API key works (test with curl)
+- [ ] Vercel AI Gateway API key works (test with curl)
+- [ ] All 5 AI Gateway models validated as available
 
 ### Project Structure
 - [ ] All directories created according to structure above
@@ -411,50 +412,32 @@ curl -X GET https://api.horizon3.ai/v1/scans \
 
 **Note**: Horizon3.ai API documentation may be limited. If you can't access the API, document this in your README and plan to implement a mock version for the demo.
 
-#### OpenAI API Key
+#### Vercel AI Gateway API Key
 
-1. Visit https://platform.openai.com
-2. Sign up / log in
-3. Navigate to API Keys
-4. Create new secret key
-5. Copy and save immediately (won't be shown again)
+Stepwise uses Vercel AI Gateway for unified access to multiple LLM providers through a single API.
 
-**Test OpenAI API:**
+1. Visit https://vercel.com
+2. Navigate to your project → AI Gateway section
+3. Generate an API key
+4. Copy and save securely
+
+**Test AI Gateway Access:**
 ```bash
-curl https://api.openai.com/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_OPENAI_API_KEY" \
-  -d '{
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": "Say hello"}],
-    "max_tokens": 10
-  }'
+curl https://ai-gateway.vercel.sh/v1/models \
+  -H "Authorization: Bearer YOUR_AI_GATEWAY_API_KEY" \
+  -H "Content-Type: application/json"
 
-# Should return completion, not 401
+# Should return list of available models including:
+# - anthropic/claude-haiku-4.5
+# - anthropic/claude-sonnet-4.5
+# - openai/gpt-5.1-instant
+# - openai/gpt-5.1-codex
+# - openai/gpt-5.1-thinking
 ```
 
-**Alternative: Anthropic API Key**
+**Verify AI Gateway is working:**
 
-If using Claude instead of GPT:
-
-1. Visit https://console.anthropic.com
-2. Sign up / log in
-3. Navigate to API Keys
-4. Create new key
-5. Copy and save
-
-**Test Anthropic API:**
-```bash
-curl https://api.anthropic.com/v1/messages \
-  -H "x-api-key: YOUR_ANTHROPIC_API_KEY" \
-  -H "anthropic-version: 2023-06-01" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "claude-3-5-sonnet-20241022",
-    "max_tokens": 10,
-    "messages": [{"role": "user", "content": "Say hello"}]
-  }'
-```
+See `docs/AI_GATEWAY_INTEGRATION.md` for complete setup guide and model selection strategy.
 
 ### Step 3: Create Project Structure (30 minutes)
 
@@ -578,9 +561,16 @@ GLADIA_API_KEY=your_gladia_api_key_here
 HONEYHIVE_API_KEY=your_honeyhive_api_key_here
 HORIZON3_API_KEY=your_horizon3_api_key_here
 
-# LLM Provider (choose one)
-OPENAI_API_KEY=your_openai_api_key_here
-# ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# Vercel AI Gateway - Unified LLM Access
+AI_GATEWAY_API_KEY=your_vercel_ai_gateway_api_key_here
+AI_GATEWAY_BASE_URL=https://ai-gateway.vercel.sh/v1
+
+# Model Selection (defaults provided, customize as needed)
+AI_GATEWAY_DEFAULT_MODEL=anthropic/claude-sonnet-4.5
+AI_GATEWAY_FAST_MODEL=anthropic/claude-haiku-4.5
+AI_GATEWAY_INSTANT_MODEL=openai/gpt-5.1-instant
+AI_GATEWAY_CODE_MODEL=openai/gpt-5.1-codex
+AI_GATEWAY_REASONING_MODEL=openai/gpt-5.1-thinking
 
 # Application Configuration
 NODE_ENV=development
@@ -640,7 +630,9 @@ Built for the E2B + Docker MCP Hackathon with integration of 3 sponsor tools:
         ↓
 [Gradio Frontend]
         ↓
-[Stepwise Agent] ←→ [OpenAI GPT-4 / Anthropic Claude]
+[Stepwise Agent] ←→ [AI Gateway: 5 Models]
+                      ├─ Claude Haiku/Sonnet (Anthropic)
+                      └─ GPT-5.1 variants (OpenAI)
         ↓
 [E2B Sandbox Environment]
         ↓
@@ -666,7 +658,7 @@ Built for the E2B + Docker MCP Hackathon with integration of 3 sponsor tools:
 - Node.js 18+ or Python 3.9+
 - Docker Desktop 4.25+
 - E2B CLI
-- API Keys: E2B, Gladia, HoneyHive, Horizon3, OpenAI/Anthropic
+- API Keys: E2B, Gladia, HoneyHive, Horizon3, Vercel AI Gateway
 
 ### Installation
 
@@ -806,8 +798,8 @@ To obtain required API keys:
 - **Gladia**: Sign up at https://gladia.io
 - **HoneyHive**: Sign up at https://honeyhive.ai
 - **Horizon3.ai**: Sign up at https://horizon3.ai
-- **OpenAI**: Get key at https://platform.openai.com
-- **Anthropic**: Get key at https://console.anthropic.com
+- **Vercel AI Gateway**: Sign up at https://vercel.com/docs/ai-gateway
+  (Provides unified access to OpenAI and Anthropic models)
 
 ## Troubleshooting
 
@@ -915,11 +907,25 @@ async function validateKeys() {
     console.error('❌ HORIZON3_API_KEY missing')
   }
 
-  // OpenAI or Anthropic
-  if (process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY) {
-    console.log('✅ LLM API key present')
+  // AI Gateway
+  if (process.env.AI_GATEWAY_API_KEY) {
+    console.log('✅ AI_GATEWAY_API_KEY present')
+
+    // Verify models configured
+    const models = [
+      'AI_GATEWAY_DEFAULT_MODEL',
+      'AI_GATEWAY_FAST_MODEL',
+      'AI_GATEWAY_INSTANT_MODEL',
+      'AI_GATEWAY_CODE_MODEL',
+      'AI_GATEWAY_REASONING_MODEL'
+    ]
+    models.forEach(model => {
+      if (process.env[model]) {
+        console.log(`✅ ${model} configured`)
+      }
+    })
   } else {
-    console.error('❌ No LLM API key (OPENAI_API_KEY or ANTHROPIC_API_KEY)')
+    console.error('❌ AI_GATEWAY_API_KEY missing')
   }
 
   console.log('\nAll keys validated!')

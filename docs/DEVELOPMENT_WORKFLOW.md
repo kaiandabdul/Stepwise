@@ -91,10 +91,8 @@ GLADIA_API_KEY=your_gladia_key
 HONEYHIVE_API_KEY=your_honeyhive_key
 HORIZON3_API_KEY=your_horizon3_key
 
-# LLM
-OPENAI_API_KEY=your_openai_key
-# or
-ANTHROPIC_API_KEY=your_anthropic_key
+# LLM (Vercel AI Gateway)
+AI_GATEWAY_API_KEY=your_ai_gateway_key
 
 # Application
 NODE_ENV=development
@@ -518,7 +516,7 @@ describe('Voice to API Workflow', () => {
       e2bApiKey: process.env.E2B_API_KEY,
       gladiaApiKey: process.env.GLADIA_API_KEY,
       honeyhiveApiKey: process.env.HONEYHIVE_API_KEY,
-      openaiApiKey: process.env.OPENAI_API_KEY
+      aiGatewayApiKey: process.env.AI_GATEWAY_API_KEY
     })
 
     await agent.initialize()

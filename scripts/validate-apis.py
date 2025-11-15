@@ -7,7 +7,7 @@ It checks for:
 - E2B API key (required)
 - Gladia API key (required)
 - HoneyHive API key (required)
-- OpenAI or Anthropic API key (at least one required)
+- Vercel AI Gateway API key (required)
 - Horizon3 API key (optional)
 
 Usage:
@@ -119,28 +119,38 @@ def validate_honeyhive():
     return True
 
 
-def validate_llm():
-    """Validate OpenAI or Anthropic API key (at least one required)"""
-    openai_key = os.getenv("OPENAI_API_KEY")
-    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+def validate_ai_gateway():
+    """Validate Vercel AI Gateway API key (required)"""
+    api_key = os.getenv("AI_GATEWAY_API_KEY")
 
-    has_openai = openai_key and len(openai_key) > 10
-    has_anthropic = anthropic_key and len(anthropic_key) > 10
-
-    if has_openai:
-        print_status("OPENAI_API_KEY", True, f"Set ({len(openai_key)} chars)")
-    else:
-        print_status("OPENAI_API_KEY", False, "Not set")
-
-    if has_anthropic:
-        print_status("ANTHROPIC_API_KEY", True, f"Set ({len(anthropic_key)} chars)")
-    else:
-        print_status("ANTHROPIC_API_KEY", False, "Not set")
-
-    if has_openai or has_anthropic:
-        return True
-    else:
+    if not api_key:
+        print_status("AI_GATEWAY_API_KEY", False, "Required for unified LLM access")
         return False
+
+    if len(api_key) < 10:
+        print_status("AI_GATEWAY_API_KEY", False, "Value too short")
+        return False
+
+    print_status("AI_GATEWAY_API_KEY", True, f"Set ({len(api_key)} chars)")
+
+    # Check optional model configuration
+    models_to_check = [
+        ("AI_GATEWAY_DEFAULT_MODEL", "anthropic/claude-sonnet-4.5"),
+        ("AI_GATEWAY_FAST_MODEL", "anthropic/claude-haiku-4.5"),
+        ("AI_GATEWAY_INSTANT_MODEL", "openai/gpt-5.1-instant"),
+        ("AI_GATEWAY_CODE_MODEL", "openai/gpt-5.1-codex"),
+        ("AI_GATEWAY_REASONING_MODEL", "openai/gpt-5.1-thinking"),
+    ]
+
+    all_models_configured = True
+    for var_name, default_value in models_to_check:
+        model = os.getenv(var_name)
+        if model:
+            print_status(var_name, True, f"'{model}'")
+        else:
+            print_status(var_name, True, f"Using default '{default_value}'")
+
+    return True
 
 
 def validate_horizon3():
@@ -198,7 +208,7 @@ def main():
         "e2b": validate_e2b(),
         "gladia": validate_gladia(),
         "honeyhive": validate_honeyhive(),
-        "llm": validate_llm(),
+        "ai_gateway": validate_ai_gateway(),
     }
 
     # Validate optional API keys
@@ -233,8 +243,9 @@ def main():
                     print(f"  - GLADIA_API_KEY: Get from https://www.gladia.io")
                 elif key == "honeyhive":
                     print(f"  - HONEYHIVE_API_KEY: Get from https://www.honeyhive.ai")
-                elif key == "llm":
-                    print(f"  - OPENAI_API_KEY or ANTHROPIC_API_KEY")
+                elif key == "ai_gateway":
+                    print(f"  - AI_GATEWAY_API_KEY: Get from https://vercel.com/docs/ai-gateway")
+                    print(f"    Provides unified access to OpenAI and Anthropic models")
 
         print(f"\nAdd missing keys to: {Colors.BOLD}.env{Colors.RESET}")
         print(f"Reference: {Colors.BOLD}.env.example{Colors.RESET}\n")

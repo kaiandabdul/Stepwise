@@ -60,13 +60,18 @@ const REQUIRED_VARS = [
   'GLADIA_API_KEY',
   'HONEYHIVE_API_KEY',
   'HONEYHIVE_PROJECT',
-  'OPENAI_API_KEY'
+  'AI_GATEWAY_API_KEY'
 ];
 
 const OPTIONAL_VARS = [
   'E2B_TEMPLATE_ID',
   'HORIZON3_API_KEY',
-  'ANTHROPIC_API_KEY',
+  'AI_GATEWAY_BASE_URL',
+  'AI_GATEWAY_DEFAULT_MODEL',
+  'AI_GATEWAY_FAST_MODEL',
+  'AI_GATEWAY_INSTANT_MODEL',
+  'AI_GATEWAY_CODE_MODEL',
+  'AI_GATEWAY_REASONING_MODEL',
   'USE_E2B',
   'LOG_LEVEL',
   'PORT'
@@ -193,36 +198,56 @@ async function validateHoneyHive() {
   }
 }
 
-async function validateOpenAI() {
-  log('info', 'Validating OpenAI connection...');
-  if (!process.env.OPENAI_API_KEY) {
-    log('warn', 'OPENAI_API_KEY not set');
-    if (process.env.ANTHROPIC_API_KEY) {
-      log('info', 'Will use ANTHROPIC_API_KEY instead');
-      return true;
-    }
-    log('error', 'Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set');
+async function validateAIGateway() {
+  log('info', 'Validating Vercel AI Gateway connection...');
+  if (!process.env.AI_GATEWAY_API_KEY) {
+    log('error', 'AI_GATEWAY_API_KEY not set');
     return false;
   }
 
+  const baseURL = process.env.AI_GATEWAY_BASE_URL || 'https://ai-gateway.vercel.sh/v1';
+
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/models',
-      {},
+    const response = await axios.get(
+      `${baseURL}/models`,
       {
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+          'Authorization': `Bearer ${process.env.AI_GATEWAY_API_KEY}`,
+          'Content-Type': 'application/json'
         },
         timeout: 5000
       }
     );
-    log('success', 'OpenAI API connection successful');
+    log('success', 'AI Gateway API connection successful');
+
+    // Validate that required models are available
+    const models = response.data?.data || [];
+    const modelIds = models.map(m => m.id);
+
+    const requiredModels = [
+      'anthropic/claude-haiku-4.5',
+      'anthropic/claude-sonnet-4.5',
+      'openai/gpt-5.1-instant',
+      'openai/gpt-5.1-codex',
+      'openai/gpt-5.1-thinking'
+    ];
+
+    const missingModels = requiredModels.filter(m => !modelIds.includes(m));
+    if (missingModels.length > 0) {
+      log('warn', `Some configured models may not be available: ${missingModels.join(', ')}`);
+      log('info', 'This may be expected if using a different AI Gateway configuration');
+    } else {
+      log('success', 'All 5 configured models are available via AI Gateway');
+    }
+
     return true;
   } catch (error) {
     if (error.response?.status === 401) {
-      log('error', 'OPENAI_API_KEY is invalid or expired');
+      log('error', 'AI_GATEWAY_API_KEY is invalid or expired');
+    } else if (error.code === 'ECONNREFUSED') {
+      log('error', 'Cannot connect to AI Gateway (network error)');
     } else {
-      log('error', `OpenAI validation failed: ${error.message}`);
+      log('error', `AI Gateway validation failed: ${error.message}`);
     }
     return false;
   }
@@ -320,7 +345,7 @@ async function main() {
     validateE2B(),
     validateGladia(),
     validateHoneyHive(),
-    validateOpenAI(),
+    validateAIGateway(),
     validateHorizon3(),
     checkLocalPorts()
   ]);
