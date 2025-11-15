@@ -1,0 +1,56 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.venv_*/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Build & output
+dist/
+build/
+*.log
+logs/
+coverage/
+.nyc_output/
+
+# E2B & Docker
+.e2b/
+.docker/
+*.box
+e2b_env_id.txt
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Testing
+.vitest/
+test-results/
+*.test.js.snap
+
+# Cache
+.eslintcache
+.pytest_cache/
+.turbo/
+
+# Temp files
+tmp/
+temp/
+*.bak

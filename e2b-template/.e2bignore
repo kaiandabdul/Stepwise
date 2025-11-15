@@ -1,0 +1,66 @@
+# E2B Template Build Ignore Patterns
+# Files and directories excluded from template build to reduce size and build time
+
+# Documentation
+*.md
+*.txt
+*.pdf
+
+# Version control
+.git
+.gitignore
+.github
+
+# Node/Python dependencies (will be installed in template)
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Environment and config
+.env
+.env.local
+.env.*.local
+.envrc
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.eslintcache
+
+# Build artifacts
+build/
+dist/
+*.tgz
+*.zip
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Docker artifacts (will be built in sandbox)
+.docker/
+docker-compose.override.yml
+
+# Large files
+*.iso
+*.tar.gz
+*.tar.bz2
