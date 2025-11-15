@@ -2,12 +2,12 @@
 E2B Template Definition for Stepwise MCP Debugger
 Uses E2B Template SDK v2
 """
-from e2b import Template, wait_for_port
+from e2b import Template
 
 # Define the template
 template = (
     Template()
-    .from_ubuntu("24.04")
+    .from_ubuntu_image("24.04")
 
     # Install system dependencies
     .apt_install([
