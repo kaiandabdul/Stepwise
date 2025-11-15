@@ -4,47 +4,105 @@
 
 This is a custom E2B template for the Stepwise Live API Debugger Agent. It includes Docker Engine and docker-compose pre-installed, allowing sandboxes to run containerized MCP servers without additional setup.
 
+**IMPORTANT**: This template uses the **E2B Template SDK v2** (Python-based). The CLI-based template system has been deprecated.
+
 ### Template Features
 
-- **Base Image**: E2B Code Interpreter (pre-configured Python/Node.js environment)
+- **Base Image**: Ubuntu 24.04 with Python 3, Node.js, and essential tools
 - **Docker Engine**: Full Docker daemon with CLI tools
-- **docker-compose**: Standalone binary for multi-container orchestration
+- **docker-compose v2**: Multi-container orchestration
+- **Pre-installed Packages**: fastmcp, honeyhive, python-dotenv, requests, pydantic
 - **Exposed Ports**: 8000, 8001, 8002, 8003 (for MCP servers: Gladia, HoneyHive, Horizon3, Custom API)
-- **Working Directory**: `/root` (agent can upload files and docker-compose.yml here)
+- **Working Directory**: `/app` (agent uploads docker-compose.yml here)
 
 ## Build Instructions
 
 ### Prerequisites
 
-- E2B CLI installed: `npm install -g @e2b/cli`
-- E2B authentication: `e2b auth login`
+- Python 3.8+ installed
+- E2B Python SDK: `pip install e2b python-dotenv`
+- E2B API key set in `.env` file: `E2B_API_KEY=your_key_here`
 - ~10-15 minutes build time (pulling Docker dependencies)
 
 ### Building the Template
+
+**For Development (2 CPU, 4GB RAM):**
 
 ```bash
 # Navigate to e2b-template directory
 cd e2b-template
 
-# Build and register template with E2B
-e2b template build --name stepwise-debugger
+# Install Python dependencies
+pip install e2b python-dotenv
 
-# Output will show template ID (looks like: tmpl_xxxxxxxxxxxxx)
-# Save this ID to .env as E2B_TEMPLATE_ID
+# Build template
+python build_dev.py
+
+# Output will show template ID and alias
+# Template ID: tmpl_xxxxxxxxxxxxx
+# Alias: stepwise-dev
+```
+
+**For Production (4 CPU, 8GB RAM):**
+
+```bash
+# Build production template with more resources
+python build_prod.py
+
+# Output will show template ID and alias
+# Template ID: tmpl_xxxxxxxxxxxxx
+# Alias: stepwise-prod
+```
+
+**Save Template ID:**
+
+```bash
+# Add the template ID to your .env file
+echo "E2B_TEMPLATE_ID=tmpl_xxxxxxxxxxxxx" >> ../.env
 ```
 
 ### What Happens During Build
 
-1. E2B reads `e2b.Dockerfile`
-2. Base layer pulled from `e2b/code-interpreter:latest`
-3. Docker Engine packages installed (~3-5 min)
-4. docker-compose binary downloaded (~1-2 min)
-5. Template registered on E2B servers (~1-2 min)
-6. Template ID provided for use in agent
+1. E2B SDK reads `template.py` definition
+2. Base Ubuntu 24.04 image pulled
+3. System dependencies installed (docker.io, docker-compose-v2, python3, nodejs, npm)
+4. Python packages installed globally for MCP servers
+5. Working directory created at `/app`
+6. Template registered on E2B servers with alias
+7. Template ID provided for use in agent
 
 ## Usage Example
 
 Once template is built, create a sandbox using it:
+
+**Using Python SDK:**
+
+```python
+from e2b import Sandbox
+import os
+
+# Create sandbox from custom template
+sandbox = Sandbox(template_id=os.getenv("E2B_TEMPLATE_ID"))
+
+# Docker is now available inside sandbox
+result = sandbox.process.run("docker --version")
+print(result.stdout)  # "Docker version 24.x.x, build xxxxxxx"
+
+# docker-compose is also ready
+result = sandbox.process.run("docker compose version")
+print(result.stdout)  # "Docker Compose version v2.23.0"
+
+# Upload docker-compose.yml and start services
+with open("./docker-compose.prod.yml", "r") as f:
+    sandbox.filesystem.write("/app/docker-compose.yml", f.read())
+
+sandbox.process.run("docker compose up -d", cwd="/app")
+
+# MCP servers now running on ports 8000-8003
+sandbox.close()
+```
+
+**Using JavaScript/TypeScript SDK:**
 
 ```javascript
 const { Sandbox } = require("@e2b/sdk");
@@ -62,22 +120,23 @@ console.log(stdout);  // "Docker version 24.x.x, build xxxxxxx"
 
 // docker-compose is also ready
 const { stdout: dcVersion } = await sandbox.process.run({
-  command: "docker-compose --version"
+  command: "docker compose version"
 });
 console.log(dcVersion);  // "Docker Compose version v2.23.0"
 
 // Upload docker-compose.yml and start services
 await sandbox.uploadFile({
-  remoteFilePath: "/root/docker-compose.yml",
+  remoteFilePath: "/app/docker-compose.yml",
   localFilePath: "./docker-compose.prod.yml"
 });
 
 await sandbox.process.run({
-  command: "docker-compose up -d",
-  cwd: "/root"
+  command: "docker compose up -d",
+  cwd: "/app"
 });
 
 // MCP servers now running on ports 8000-8003
+await sandbox.close();
 ```
 
 ## Architecture

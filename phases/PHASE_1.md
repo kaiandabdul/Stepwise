@@ -272,18 +272,24 @@ Verify:
 git --version
 ```
 
-#### Install E2B CLI
+#### Install E2B CLI (v2)
 
 ```bash
-# Using npm
-npm install -g @e2b/cli
+# Using npm (latest for E2B v2)
+npm install -g @e2b/cli@latest
 
 # Or using pip
-pip install e2b-cli
+pip install e2b-cli>=0.10.0
 
 # Verify
 e2b --version
 ```
+
+**Note on E2B v2 API Changes**:
+- The E2B SDK v2 changes how sandboxes are created and files are accessed
+- Use `Sandbox.create()` instead of `new Sandbox()` (v1 pattern)
+- File operations now use `sandbox.files.write()` and `sandbox.files.read()`
+- See [docs/E2B_INTEGRATION.md](../docs/E2B_INTEGRATION.md) for updated patterns
 
 #### Install VS Code (Recommended)
 
@@ -360,9 +366,18 @@ npm install @honeyhive/sdk
 pip install honeyhive
 ```
 
+**Install HoneyHive SDK:**
+```bash
+# Node.js (v0.2.57+)
+npm install @honeyhive/sdk@latest
+
+# Or update existing installation
+npm update @honeyhive/sdk
+```
+
 **Test HoneyHive API (Node.js):**
 ```javascript
-const { HoneyHive } = require('@honeyhive/sdk')
+import { HoneyHive } from '@honeyhive/sdk'
 
 const hh = new HoneyHive({
   apiKey: 'YOUR_HONEYHIVE_API_KEY',

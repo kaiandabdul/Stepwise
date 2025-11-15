@@ -2,6 +2,13 @@
 
 ## E2B SDK Usage & Sandbox Management
 
+**NOTE: This guide covers E2B v2 API**. If you are using E2B v1, the following APIs have changed:
+- `Sandbox()` constructor → `Sandbox.create()` (async method)
+- `sandbox.write()` → `sandbox.files.write()`
+- `sandbox.read()` → `sandbox.files.read()`
+
+See [E2B v2 Migration Guide](https://e2b.dev/docs/migration) for details.
+
 ### Table of Contents
 1. [E2B SDK Overview](#e2b-sdk-overview)
 2. [Sandbox Lifecycle Management](#sandbox-lifecycle-management)
@@ -51,47 +58,47 @@
 
 ### Installation
 
-**Node.js**:
+**Node.js** (v2 API):
 ```bash
-npm install @e2b/sdk
+npm install @e2b/sdk@latest
 ```
 
-**Python**:
+**Python** (v2 API):
 ```bash
-pip install e2b
+pip install e2b>=0.10.0
 ```
 
 ### Authentication
 
-Get your E2B API key from [https://e2b.dev/docs](https://e2b.dev/docs)
+Get your E2B API key from [https://e2b.dev](https://e2b.dev)
 
 ```bash
 # Add to .env file
 E2B_API_KEY=e2b_xxxxxxxxxxxxxxxxxxxxx
 ```
 
-**Node.js**:
+**Node.js (v2 API)**:
 ```javascript
 import { Sandbox } from '@e2b/sdk'
 
-// Option 1: Use environment variable
-const sandbox = await Sandbox.create()  // Reads E2B_API_KEY automatically
-
-// Option 2: Pass explicitly
+// Option 1: Use environment variable (v2 API - using Sandbox.create())
 const sandbox = await Sandbox.create({
-  apiKey: process.env.E2B_API_KEY
+  apiKey: process.env.E2B_API_KEY  // Pass explicitly for clarity
 })
+
+// Option 2: Auto-read from E2B_API_KEY environment variable
+const sandbox = await Sandbox.create()
 ```
 
-**Python**:
+**Python (v2 API)**:
 ```python
 from e2b import Sandbox
 
 # Option 1: Use environment variable
-sandbox = Sandbox.create()  # Reads E2B_API_KEY automatically
+sandbox = await Sandbox.create(api_key=os.getenv('E2B_API_KEY'))
 
-# Option 2: Pass explicitly
-sandbox = Sandbox.create(api_key=os.getenv('E2B_API_KEY'))
+# Option 2: Auto-read from E2B_API_KEY
+sandbox = await Sandbox.create()
 ```
 
 ---
@@ -767,13 +774,15 @@ console.log(redactSecrets(logs.stdout))
 
 ---
 
-## 5. Filesystem Operations
+## 5. Filesystem Operations (v2 API)
+
+**E2B v2 Update**: All file operations now use `sandbox.files.*` namespace.
 
 ### 5.1 Writing Files
 
-**Node.js**:
+**Node.js (v2 API)**:
 ```javascript
-// Write text file
+// Write text file (v2 API - using sandbox.files.write())
 await sandbox.files.write('/app/config.json', JSON.stringify({
   mode: 'production',
   debug: false
@@ -784,9 +793,9 @@ const audioBuffer = fs.readFileSync('./sample.mp3')
 await sandbox.files.write('/tmp/sample.mp3', audioBuffer)
 ```
 
-**Python**:
+**Python (v2 API)**:
 ```python
-# Write text file
+# Write text file (v2 API - using sandbox.files.write())
 await sandbox.files.write('/app/config.json', json.dumps({
     'mode': 'production',
     'debug': False
@@ -800,9 +809,9 @@ await sandbox.files.write('/tmp/sample.mp3', audio_data)
 
 ### 5.2 Reading Files
 
-**Node.js**:
+**Node.js (v2 API)**:
 ```javascript
-// Read text file
+// Read text file (v2 API - using sandbox.files.read())
 const configContent = await sandbox.files.read('/app/config.json')
 const config = JSON.parse(configContent)
 
@@ -810,9 +819,9 @@ const config = JSON.parse(configContent)
 const audioBuffer = await sandbox.files.read('/tmp/sample.mp3', { encoding: 'binary' })
 ```
 
-**Python**:
+**Python (v2 API)**:
 ```python
-# Read text file
+# Read text file (v2 API - using sandbox.files.read())
 config_content = await sandbox.files.read('/app/config.json')
 config = json.loads(config_content)
 

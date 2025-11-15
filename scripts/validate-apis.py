@@ -102,7 +102,7 @@ def validate_gladia():
 
 
 def validate_honeyhive():
-    """Validate HoneyHive API key"""
+    """Validate HoneyHive API key (v0.2.57 compatible)"""
     api_key = os.getenv("HONEYHIVE_API_KEY")
 
     if not api_key:

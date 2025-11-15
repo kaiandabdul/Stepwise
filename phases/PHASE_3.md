@@ -153,39 +153,81 @@ description = "E2B template with Docker for running MCP servers"
 version = "1.0.0"
 ```
 
-#### Build and Publish Template
+#### Build and Publish Template (E2B v2 SDK Method)
+
+**Note**: E2B v2 deprecates CLI-based template building. Use the SDK method instead:
 
 ```bash
 cd e2b-template
 
-# Build template (takes 5-10 minutes)
-e2b template build --name stepwise-debugger
+# Method 1: Using E2B SDK (Recommended for v2)
+# Create build_dev.py script (see example below)
+python build_dev.py
 
-# Output will show:
+# The script will output the template ID:
 # Template built successfully
 # Template ID: <template-id>
 
-# Save template ID
+# Save template ID to .env
 echo "E2B_TEMPLATE_ID=<template-id>" >> ../.env
 
-# Test template by creating sandbox
+# Test by creating a sandbox
 e2b sandbox create --template stepwise-debugger
 
-# Should create sandbox successfully
-# Note the sandbox ID
-
-# Connect to sandbox to verify Docker
+# Connect and verify Docker
 e2b sandbox connect <sandbox-id>
-
-# Inside sandbox, verify Docker
 docker --version
 docker-compose --version
-
-# Exit sandbox
 exit
 
-# Kill test sandbox
+# Cleanup test sandbox
 e2b sandbox kill <sandbox-id>
+```
+
+**Example `build_dev.py` (E2B v2 SDK)**:
+```python
+import asyncio
+from e2b import Sandbox
+import os
+
+async def build_template():
+    # Build custom template with Dockerfile
+    sandbox = await Sandbox.create(
+        template='base',  # Start from base template
+        timeout=600000  # 10 minutes
+    )
+
+    try:
+        # Upload Dockerfile
+        with open('Dockerfile', 'r') as f:
+            dockerfile_content = f.read()
+
+        await sandbox.files.write('/Dockerfile', dockerfile_content)
+
+        # Build Docker image from Dockerfile
+        result = await sandbox.commands.run(
+            'cd / && docker build -t stepwise-template .',
+            timeout_ms=300000
+        )
+
+        if result.exit_code != 0:
+            print(f"Build failed: {result.stderr}")
+            return
+
+        print(f"Template built successfully")
+        print(f"Sandbox ID: {sandbox.sandbox_id}")
+
+    finally:
+        await sandbox.kill()
+
+asyncio.run(build_template())
+```
+
+**Legacy Method (E2B v1 CLI - deprecated)**:
+```bash
+# Old way (no longer recommended)
+# e2b template build --name stepwise-debugger
+# Use SDK method above instead
 ```
 
 ### Step 2: Create Docker Compose Configuration (2 hours)
