@@ -13,7 +13,7 @@ This is a custom E2B template for the Stepwise Live API Debugger Agent. It inclu
 - **docker-compose v2**: Multi-container orchestration
 - **Pre-installed Packages**: fastmcp, honeyhive, python-dotenv, requests, pydantic
 - **Exposed Ports**: 8000, 8001, 8002, 8003 (for MCP servers: Gladia, HoneyHive, Horizon3, Custom API)
-- **Working Directory**: `/app` (agent uploads docker-compose.yml here)
+- **Working Directory**: `/home/user/app` (agent uploads docker-compose.yml here)
 
 ## Build Instructions
 

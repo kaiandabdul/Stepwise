@@ -22,8 +22,9 @@ template = (
         "git"
     ])
 
-    # Set up working directory
-    .run_cmd("mkdir -p /app")
+    # Set up working directory in user home (avoids permission issues)
+    .make_dir("/home/user/app", mode=0o755)
+    .set_workdir("/home/user/app")
 
     # Install Python packages globally for MCP servers
     .pip_install([
@@ -47,6 +48,6 @@ template = (
     # Port 8002: Horizon3 MCP
     # Port 8003: Custom API MCP
 
-    # Note: Actual startup command will be set dynamically by agent
-    # when it uploads docker-compose.yml and starts services
+    # Note: Agent will upload docker-compose.yml to /home/user/app
+    # and start services dynamically
 )
