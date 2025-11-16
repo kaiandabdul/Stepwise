@@ -1,9 +1,9 @@
 # Gladia MCP Server Dockerfile
-# Base image: Node.js 20 slim (updated for undici compatibility)
-FROM node:20-slim
+# Base image: Node.js 20 alpine (optimized size)
+FROM node:20-alpine
 
 # Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
 # Set working directory
 WORKDIR /app
@@ -16,6 +16,11 @@ RUN npm ci --only=production
 
 # Copy source code
 COPY src/ ./src/
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    chown -R appuser:appgroup /app
+USER appuser
 
 # Expose port 8000
 EXPOSE 8000

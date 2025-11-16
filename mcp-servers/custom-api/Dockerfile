@@ -1,7 +1,7 @@
-FROM node:20-slim
+FROM node:20-alpine
 
 # Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
 WORKDIR /app
 
@@ -13,6 +13,11 @@ RUN npm ci --only=production
 
 # Copy source code
 COPY src/ ./src/
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    chown -R appuser:appgroup /app
+USER appuser
 
 # Expose port
 EXPOSE 8003
